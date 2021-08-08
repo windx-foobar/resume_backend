@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Product extends Model {
    protected $table = 'products';
@@ -13,4 +14,11 @@ class Product extends Model {
       'title',
       'price'
    ];
+
+   /**
+    * @return BelongsToMany
+    */
+   public function categories() {
+      return $this->belongsToMany(Category::class);
+   }
 }
