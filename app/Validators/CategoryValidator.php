@@ -11,7 +11,7 @@ use Illuminate\Validation\Validator;
  * Class BaseValidator
  * @package App\Validators
  */
-class ProductValidator extends BaseValidator {
+class CategoryValidator extends BaseValidator {
    private $isUpdate = false;
 
    public function getMessages(): array {
@@ -21,9 +21,7 @@ class ProductValidator extends BaseValidator {
          'numeric' => 'Поле должно быть числом',
          'title.min' => 'Минимальная длина заголовка 3 символа',
          'title.max' => 'Максимальная длина заголовка 12 символов',
-         'price.min' => 'Стоимость не должна быть меньше 0',
-         'price.max' => 'Стоимость не должна быть больше 200',
-         'categories.array' => 'Категории должны быть массивом id',
+         'products.array' => 'Товары должны быть массивом id',
       ];
    }
 
@@ -32,9 +30,8 @@ class ProductValidator extends BaseValidator {
 
       return [
          'title' => $required . 'string|min:3|max:12',
-         'price' => $required . 'numeric|min:0|max:200',
-         'categories' => 'array',
-         'categories.*' => 'numeric',
+         'products' => 'array',
+         'products.*' => 'numeric',
          'eId' => 'numeric'
       ];
    }

@@ -22,6 +22,7 @@ class ProductsService {
 
          $product->title = $data['title'];
          $product->price = $data['price'];
+         $product->eId = $data['eId'] ?? null;
 
          $categories = Category::find($data['categories']);
 
