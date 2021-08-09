@@ -2,61 +2,51 @@
 
 namespace App\Http\Controllers\Api;
 
-use ErrorMapper;
-use App\Exceptions\{NotDeleteException, NotFoundException, NotValidDataException, NotSaveException, NotUpdateException};
 use App\Models\Product;
+use App\Services\ProductsService;
+use App\Transformers\ProductTransformer;
 use Exception;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Http\{Request, JsonResponse};
 use Illuminate\Routing\Controller;
-use Products;
 
 class ProductsController extends Controller {
-   /**
-    * Display a listing of the resource.
-    *
-    * @return JsonResponse
-    */
-   public function index(): JsonResponse {
-      return response()->json(
-         [
-            'message' => 'Список всех продуктов',
-            'products' => Product::all()
-         ]
-      );
+   private $productsService;
+
+   public function __construct(ProductsService $productsService) {
+      $this->productsService = $productsService;
    }
 
    /**
-    * Store a newly created resource in storage.
+    * Display a listing of the resource.
+    *
+    * @return mixed
+    */
+   public function index() {
+      return \Responder::success(Product::all(), new ProductTransformer);
+   }
+
+   /**
+    * Создать новый продукт
     *
     * @param Request $request
     *
-    * @return JsonResponse
+    * @return mixed
     */
-   public function store(Request $request): JsonResponse {
+   public function store(Request $request) {
       try {
-         return response()->json(
-            [
-               'message' => 'Продукт успешно создан',
-               'data' => Products::create($request->title, $request->price, $request->categories)
-            ]
-         );
+         $newProduct = $this->productsService->create($request->except('q'));
+
+         return \Responder::success($newProduct)->respond(\HttpStatus::HTTP_CREATED);
       } catch (Exception $e) {
          switch (true) {
-            case $e instanceof NotSaveException:
-               return response()->json(
-                  [
-                     'message' => $e->getMessage(),
-                  ],
-                  500
-               );
-            case $e instanceof NotValidDataException:
-               return response()->json(
-                  [
-                     'message' => $e->getMessage(),
-                     'errors' => $e->errors()
-                  ],
-                  400
-               );
+            case $e instanceof ValidationException:
+               return \Responder::error(null, 'Переданы неверные данные')
+                  ->data(['list' => $e->errors()])
+                  ->respond(\HttpStatus::HTTP_BAD_REQUEST);
+            default:
+               return \Responder::error(null, $e->getMessage())
+                  ->respond(\HttpStatus::HTTP_INTERNAL_SERVER_ERROR);
          }
       }
    }
@@ -66,51 +56,52 @@ class ProductsController extends Controller {
     *
     * @param Product $product
     *
-    * @return JsonResponse
+    * @return mixed
     */
-   public function show(Product $product): JsonResponse {
-      return response()->json($product);
+   public function show(Product $product) {
+      return \Responder::success($product);
    }
 
    /**
     * Update the specified resource in storage.
     *
     * @param Request $request
-    * @param int $id
+    * @param Product $product
     *
-    * @return JsonResponse
+    * @return mixed
     */
-   public function update(Request $request, int $id): JsonResponse {
+   public function update(Request $request, Product $product) {
       try {
-         return response()->json(
-            [
-               'message' => 'Продукт успешно обновлен',
-               'data' => Products::update($id, $request->toArray())
-            ]
-         );
+         $updatedProduct = $this->productsService->update($product, $request->except('q'));
+
+         return \Responder::success($updatedProduct);
       } catch (Exception $e) {
-         $error = ErrorMapper::mapErrors($e);
-         return response()->json($error['data'], $error['code']);
+         switch (true) {
+            case $e instanceof ValidationException:
+               return \Responder::error(null, 'Переданы неверные данные')
+                  ->data(['list' => $e->errors()])
+                  ->respond(\HttpStatus::HTTP_BAD_REQUEST);
+            default:
+               return \Responder::error(null, $e->getMessage())
+                  ->respond(\HttpStatus::HTTP_INTERNAL_SERVER_ERROR);
+         }
       }
    }
 
    /**
     * Remove the specified resource from storage.
     *
-    * @param int $id
+    * @param Product $product
     *
-    * @return JsonResponse
+    * @return mixed
     */
-   public function destroy(int $id): JsonResponse {
+   public function destroy(Product $product) {
       try {
-         Products::delete($id);
-
-         return response()->json(
-            ['message' => 'Продукт успешно удален'],
-         );
+         $product->delete();
+         return \Responder::success();
       } catch (Exception $e) {
-         $error = ErrorMapper::mapErrors($e);
-         return response()->json($error['data'], $error['code']);
+         return \Responder::error(null, "Продукт {$product->id} не может быть удален")
+            ->respond(\HttpStatus::HTTP_INTERNAL_SERVER_ERROR);
       }
    }
 }

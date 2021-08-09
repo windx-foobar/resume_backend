@@ -4,10 +4,9 @@ namespace App\Providers;
 
 use App\Models\Category;
 use App\Models\Product;
-use App\Services\ErrorMapperService;
 use App\Services\ProductsService;
+use App\Validators\ProductValidator;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Foundation\Application;
 
 class AppServiceProvider extends ServiceProvider {
    /**
@@ -27,13 +26,7 @@ class AppServiceProvider extends ServiceProvider {
    public function register() {
       $this->app->bind(ProductsService::class,
          function () {
-            return new ProductsService(new Product(), new Category());
-         }
-      );
-
-      $this->app->bind(ErrorMapperService::class,
-         function () {
-            return new ErrorMapperService();
+            return new ProductsService();
          }
       );
    }
