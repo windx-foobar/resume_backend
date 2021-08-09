@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\CreateEntity;
 use App\Models\Category;
 use App\Models\Product;
 use App\Validators\ProductValidator;
@@ -24,10 +25,13 @@ class ProductsService {
          $product->price = $data['price'];
          $product->eId = $data['eId'] ?? null;
 
-         $categories = Category::find($data['categories']);
+         $categories = Category::find($data['categories'] ?? []);
 
          if ($product->save()) {
             $product->categories()->attach($categories);
+
+            \Event::dispatch(new CreateEntity($product));
+
             return $product;
          }
 

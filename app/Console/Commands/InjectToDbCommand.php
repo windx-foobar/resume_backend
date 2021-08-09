@@ -2,18 +2,19 @@
 
 namespace App\Console\Commands;
 
+use App\Events\CreateEntity;
 use App\Models\Category;
 use App\Services\ProductsService;
-use App\Validators\CategoryValidator;
 use App\Transformers\{CategoryFromFileTransformer, ProductFromFileTransformer};
+use App\Validators\CategoryValidator;
 use Exception;
 use File;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use League\Fractal\Resource\Collection;
 use League\Fractal\Manager;
+use League\Fractal\Resource\Collection;
 
 class InjectToDbCommand extends Command {
    private $fractal;
@@ -106,10 +107,13 @@ class InjectToDbCommand extends Command {
          $category = new Category();
 
          $category->title = $item['title'];
-         $category->eId = $item['eId'];
+         $category->eId = $item['eId'] ?? null;
 
          if ($category->save()) {
             $this->info("Категория {$category->title} успешно добавлена");
+
+            \Event::dispatch(new CreateEntity($category));
+ 
             return;
          }
 
@@ -149,6 +153,7 @@ class InjectToDbCommand extends Command {
    public function createProductItem($item) {
       try {
          $product = $this->productsService->create($item);
+
          $this->info("Товар {$product->title} успешно добавлен");
       } catch (Exception $e) {
          $this->error('Товар не был создан/обновлен');
