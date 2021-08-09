@@ -28,15 +28,22 @@ class Product extends Model {
 
    public $timestamps = false;
 
+   protected $hidden = ['pivot'];
+
    protected $fillable = [
       'title',
       'price'
+   ];
+
+   protected $casts = [
+      'price' => 'float',
+      'eId' => 'integer'
    ];
 
    /**
     * @return BelongsToMany
     */
    public function categories() {
-      return $this->belongsToMany(Category::class);
+      return $this->belongsToMany(Category::class, 'products_categories');
    }
 }
