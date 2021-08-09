@@ -160,6 +160,7 @@ return [
     App\Providers\EventServiceProvider::class,
     App\Providers\RouteServiceProvider::class,
 
+    Flugg\Responder\ResponderServiceProvider::class
   ],
 
   /*
@@ -208,7 +209,6 @@ return [
     'URL' => Illuminate\Support\Facades\URL::class,
     'Validator' => Illuminate\Support\Facades\Validator::class,
     'View' => Illuminate\Support\Facades\View::class,
-    'Products' => App\Facades\Products::class,
-    'ErrorMapper' => App\Facades\ErrorMapper::class
+    'HttpStatus' => Kayex\HttpCodes::class,
   ],
 ];
