@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Contracts\Support\Arrayable;
 
 /**
  * App\Models\Category
@@ -21,9 +21,10 @@ use Illuminate\Database\Eloquent\Model;
 class Category extends Model {
    protected $table = 'categories';
 
-   public $timestamps = false;
-
-   protected $hidden = ['pivot'];
+   protected $fillable = [
+      'title',
+      'eId'
+   ];
 
    protected $casts = [
       'eId' => 'integer'
