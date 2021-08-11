@@ -13,6 +13,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 
 class CreateEntity {
    public $model;
+   public $update = false;
 
    use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -21,8 +22,9 @@ class CreateEntity {
     *
     * @return void
     */
-   public function __construct(Model $model) {
+   public function __construct(Model $model, $update = false) {
       $this->model = $model;
+      $this->update = $update;
    }
 
    /**
