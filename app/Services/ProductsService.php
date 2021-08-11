@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Services;
 
@@ -59,13 +59,20 @@ class ProductsService {
     * @throws Exception
     */
    public function update(Product $product, array $data): Product {
+      $this->data = collect($data);
+
       try {
          ProductValidator::validate($data, ['update' => true])->validate();
 
          $categories = $this->setCategories()->categories;
-         $product->categories()->attach($categories);
 
-         if ($product->update($data)) {
+         $this->data->each(function($value, $key) use ($product) {
+            $product->$key = $value;
+         });
+
+         if ($product->save()) {
+            $product->categories()->sync($categories ?? []);
+
             \Event::dispatch(new CreateEntity($product, true));
 
             return $product;
@@ -78,8 +85,8 @@ class ProductsService {
    }
 
    private function setCategories(): self {
-      $categoriesIds = $this->data->get('categories');
-      $categoriesEIds = $this->data->get('categoriesEId');
+      $categoriesIds = $this->data->pull('categories');
+      $categoriesEIds = $this->data->pull('categoriesEId');
 
       if ($categoriesIds) {
          $this->categories = Category::find($categoriesIds);
