@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
@@ -26,13 +25,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 class Product extends Model {
    protected $table = 'products';
 
-   public $timestamps = false;
-
-   protected $hidden = ['pivot'];
-
    protected $fillable = [
       'title',
-      'price'
+      'price',
+      'eId'
    ];
 
    protected $casts = [
