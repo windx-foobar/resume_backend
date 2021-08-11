@@ -11,6 +11,7 @@ class CategoryFromFileTransformer extends TransformerAbstract {
       $this->data = $data;
 
       return [
+         'id' => isset($this->data['id']) ? (int) $this->data['id'] : null,
          'title' => $this->data['title'],
          'eId' => $this->getEId()
       ];
