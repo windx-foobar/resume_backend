@@ -4,7 +4,7 @@
   "keywords": [],
   "license": "UNLICENSED",
   "type": "project",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "require": {
     "php": ">=7.3",
     "fideloper/proxy": "~4.0",
