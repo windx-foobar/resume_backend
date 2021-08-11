@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Events\CreateEntity;
 use App\Models\Category;
+use App\Models\Product;
 use App\Services\ProductsService;
 use App\Transformers\{CategoryFromFileTransformer, ProductFromFileTransformer};
 use App\Validators\CategoryValidator;
@@ -51,7 +52,8 @@ class InjectToDbCommand extends Command {
    /**
     * Execute the console command.
     *
-    * @return mixed
+    * @return void
+    * @throws FileNotFoundException
     */
    public function handle() {
       $basePath = $this->config->get('path');
@@ -102,26 +104,10 @@ class InjectToDbCommand extends Command {
     */
    private function createCategoryItem($item): void {
       try {
-         CategoryValidator::validate($item)->validate();
+         $id = $item['id'];
+         $oldCategory = Category::find($id);
 
-         $category = new Category();
-
-         $category->title = $item['title'];
-         $category->eId = $item['eId'] ?? null;
-
-         if ($category->save()) {
-            $this->info("Категория {$category->title} успешно добавлена");
-
-            \Event::dispatch(new CreateEntity($category));
- 
-            return;
-         }
-
-         $this->error(
-            "Что-то пошло не так с добавлением категории {$category->id}"
-         );
-
-         return;
+         $this->updateOrCreateCategory($item, $oldCategory);
       } catch (Exception $e) {
          $this->error('Категория не была создана/обновлена');
 
@@ -152,9 +138,17 @@ class InjectToDbCommand extends Command {
     */
    public function createProductItem($item) {
       try {
-         $product = $this->productsService->create($item);
+         $id = $item['id'] ?? null;
 
-         $this->info("Товар {$product->title} успешно добавлен");
+         $oldProduct = Product::find($id);
+
+         if ($oldProduct) {
+            $product = $this->productsService->update($oldProduct, $item);
+            $this->info("Товар id = {$product->id} успешно обновлен");
+         } else {
+            $product = $this->productsService->create($item);
+            $this->info("Товар {$product->title} успешно добавлен");
+         }
       } catch (Exception $e) {
          $this->error('Товар не был создан/обновлен');
          switch (true) {
@@ -166,6 +160,51 @@ class InjectToDbCommand extends Command {
                throw $e;
          }
       }
+   }
+
+   /**
+    * @param $item
+    * @param Category|null $oldCategory
+    *
+    * @return bool
+    * @throws ValidationException
+    */
+   private function updateOrCreateCategory($item, Category $oldCategory = null): bool {
+      if ($oldCategory) {
+         CategoryValidator::validate($item, ['update' => true])->validate();
+
+         if ($oldCategory->update($item)) {
+            $this->info("Категория id = {$oldCategory->id} успешно обновлена");
+            \Event::dispatch(new CreateEntity($oldCategory, true));
+
+            return true;
+         }
+
+         $this->error(
+            "Что-то пошло не так с обновлением категории {$item['id']}"
+         );
+      } else {
+         CategoryValidator::validate($item)->validate();
+
+         $category = new Category();
+
+         $category->title = $item['title'];
+         $category->eId = $item['eId'] ?? null;
+
+         if ($category->save()) {
+            $this->info("Категория {$category->title} успешно добавлена");
+
+            \Event::dispatch(new CreateEntity($category));
+
+            return true;
+         }
+
+         $this->error(
+            "Что-то пошло не так с добавлением категории {$category->id}"
+         );
+      }
+
+      return false;
    }
 
    private function createErrors(array $errors) {

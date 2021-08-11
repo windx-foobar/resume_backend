@@ -7,6 +7,7 @@ use App\Models\Category;
 use Illuminate\Mail\Message;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Str;
 
 class SendEmailNotify {
    /**
@@ -27,11 +28,14 @@ class SendEmailNotify {
     */
    public function handle(CreateEntity $event) {
       $model = $event->model;
+      $update = $event->update;
 
-      $title = 'cоздан новый товар';
+      $title = $update ? 'обновлен' : 'создан новый';
+      $title .= ' товар';
 
       if ($event->model instanceof Category) {
-         $title = 'cоздана новая категория';
+         $title = $update ? 'обновлена' : 'создана новая';
+         $title .= ' категория';
       }
 
       \Mail::send(
@@ -41,7 +45,7 @@ class SendEmailNotify {
             $message
                ->from('resume-backend@debug.ru')
                ->to(config('mail.to'))
-               ->subject(ucfirst($title));
+               ->subject(Str::ucfirst($title));
          }
       );
    }
