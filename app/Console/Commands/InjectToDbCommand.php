@@ -116,7 +116,7 @@ class InjectToDbCommand extends Command {
                $this->line("Список ошибок {$item['title']}:");
                $this->createErrors($e->errors());
                break;
-            default:
+            case $e instanceof Exception:
                throw $e;
          }
       }
@@ -156,7 +156,7 @@ class InjectToDbCommand extends Command {
                $this->line("Список ошибок {$item['title']}:");
                $this->createErrors($e->errors());
                break;
-            default:
+            case $e instanceof Exception:
                throw $e;
          }
       }
