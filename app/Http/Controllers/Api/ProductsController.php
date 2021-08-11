@@ -7,7 +7,7 @@ use App\Services\ProductsService;
 use App\Transformers\ProductTransformer;
 use Exception;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Http\{Request, JsonResponse};
+use Illuminate\Http\{Request};
 use Illuminate\Routing\Controller;
 
 class ProductsController extends Controller {
@@ -18,7 +18,7 @@ class ProductsController extends Controller {
    }
 
    /**
-    * Display a listing of the resource.
+    * Показать список всех товаров.
     *
     * @return mixed
     */
@@ -27,11 +27,11 @@ class ProductsController extends Controller {
    }
 
    /**
-    * Создать новый продукт
+    * Создать новый товар.
     *
     * @param Request $request
     *
-    * @return mixed
+    * @return void|mixed
     */
    public function store(Request $request) {
       try {
@@ -45,36 +45,35 @@ class ProductsController extends Controller {
                   ->data(['list' => $e->errors()])
                   ->respond(\HttpStatus::HTTP_BAD_REQUEST);
             case $e instanceof Exception:
-               return \Responder::error(null, $e->getMessage())
-                  ->respond(\HttpStatus::HTTP_INTERNAL_SERVER_ERROR);
+               return \Responder::error(null, $e->getMessage())->respond(\HttpStatus::HTTP_INTERNAL_SERVER_ERROR);
          }
       }
    }
 
    /**
-    * Display the specified resource.
+    * Показать определенный товар.
     *
     * @param Product $product
     *
     * @return mixed
     */
    public function show(Product $product) {
-      return \Responder::success($product);
+      return \Responder::success($product, new ProductTransformer);
    }
 
    /**
-    * Update the specified resource in storage.
+    * Обновить товар.
     *
     * @param Request $request
     * @param Product $product
     *
-    * @return mixed
+    * @return void|mixed
     */
    public function update(Request $request, Product $product) {
       try {
          $updatedProduct = $this->productsService->update($product, $request->except('q'));
 
-         return \Responder::success($updatedProduct);
+         return \Responder::success($updatedProduct, new ProductTransformer);
       } catch (Exception $e) {
          switch (true) {
             case $e instanceof ValidationException:
@@ -82,14 +81,13 @@ class ProductsController extends Controller {
                   ->data(['list' => $e->errors()])
                   ->respond(\HttpStatus::HTTP_BAD_REQUEST);
             case $e instanceof Exception:
-               return \Responder::error(null, $e->getMessage())
-                  ->respond(\HttpStatus::HTTP_INTERNAL_SERVER_ERROR);
+               return \Responder::error(null, $e->getMessage())->respond(\HttpStatus::HTTP_INTERNAL_SERVER_ERROR);
          }
       }
    }
 
    /**
-    * Remove the specified resource from storage.
+    * Удалить товар.
     *
     * @param Product $product
     *
