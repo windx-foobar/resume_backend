@@ -33,8 +33,10 @@ class ProductValidator extends BaseValidator {
       return [
          'title' => $required . 'string|min:3|max:12',
          'price' => $required . 'numeric|min:0|max:200',
-         'categories' => 'array',
+         'categories' => 'nullable|array',
          'categories.*' => 'numeric',
+         'categoriesEId' => 'nullable|array',
+         'categoriesEId.*' => 'numeric',
          'eId' => 'numeric'
       ];
    }
