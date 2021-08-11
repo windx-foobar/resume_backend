@@ -30,8 +30,6 @@ class CategoryValidator extends BaseValidator {
 
       return [
          'title' => $required . 'string|min:3|max:12',
-         'products' => 'array',
-         'products.*' => 'numeric',
          'eId' => 'numeric'
       ];
    }
