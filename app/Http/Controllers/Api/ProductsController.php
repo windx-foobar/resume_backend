@@ -44,7 +44,7 @@ class ProductsController extends Controller {
                return \Responder::error(null, 'Переданы неверные данные')
                   ->data(['list' => $e->errors()])
                   ->respond(\HttpStatus::HTTP_BAD_REQUEST);
-            default:
+            case $e instanceof Exception:
                return \Responder::error(null, $e->getMessage())
                   ->respond(\HttpStatus::HTTP_INTERNAL_SERVER_ERROR);
          }
@@ -81,7 +81,7 @@ class ProductsController extends Controller {
                return \Responder::error(null, 'Переданы неверные данные')
                   ->data(['list' => $e->errors()])
                   ->respond(\HttpStatus::HTTP_BAD_REQUEST);
-            default:
+            case $e instanceof Exception:
                return \Responder::error(null, $e->getMessage())
                   ->respond(\HttpStatus::HTTP_INTERNAL_SERVER_ERROR);
          }
